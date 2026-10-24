@@ -31,6 +31,7 @@
 </head>
 
 <body>
+
   <div id="pagina" class="contenido">
 
 <style>
@@ -156,22 +157,16 @@ h1{font-size:23px}h2{font-size:19px;;color:#0000FF}
             altoPDF
         );
 
-        let profesor =
-            document.getElementById("profesor").value.trim() || "Profesor";
+        let profesor = document.getElementById("profesor").value.trim() || "Profesor";
+          profesor = profesor.replace(/[\\/:*?"<>|]/g, "_");
+        let año = document.getElementById("año").value.trim();
+          año = año.replace(/[\\/:*?"<>|]/g, "_");
+        let semestre = document.getElementById("semestre").value.trim();
+          semestre = semestre.replace(/[\\/:*?"<>|]/g, "_");
+        let evaluador = document.getElementById("evaluador").value.trim();
+          evaluador = evaluador.replace(/[\\/:*?"<>|]/g, "_");
 
-        let año =
-            document.getElementById("año").value.trim();
-
-        let semestre =
-            document.getElementById("semestre").value.trim();
-
-
-        profesor = profesor.replace(/[\\/:*?"<>|]/g, "_");
-        año = año.replace(/[\\/:*?"<>|]/g, "_");
-        semestre = semestre.replace(/[\\/:*?"<>|]/g, "_");
-
-
-        pdf.save(`Evaluación ${profesor} ${año} ${semestre}.pdf`);
+        pdf.save(`Evaluación ${profesor} ${año} ${semestre} por ${evaluador}.pdf`);
 
     } catch (error) {
         alert("No fue posible generar el PDF.");
@@ -215,19 +210,46 @@ const C=[
 ["Comunicación",15,"Se expresa con seguridad, propiedad, claridad y corrección.","Utiliza lenguaje claro y correcto para una comunicación efectiva y un buen ambiente de enseñanza-aprendizaje."]
 ];
 const opts=[["E","5 - Excelente"],["S","4 - Satisfactorio"],["P","3 - Promedio"],["BP","2 - Bajo promedio"],["NS","1 - No satisfactorio"],["NR","0 - No realizado"],["N/A","X - No aplica"]];
+
 let group="";
-C.forEach(c=>{if(c[0]!==group){let tr=document.createElement("tr");tr.className="group";tr.innerHTML="<td colspan='5'></td>";tr.firstChild.textContent=c[0];document.getElementById("rows").appendChild(tr);group=c[0];}
+  C.forEach(c=>{if(c[0]!==group){let tr=document.createElement("tr"); tr.className="group";tr.innerHTML="<td colspan='5'></td>";
+  tr.firstChild.textContent=c[0];document.getElementById("rows").appendChild(tr);group=c[0];}
+
 let tr=document.createElement("tr");tr.innerHTML=`<td>${c[1]}</td><td>${c[2]}</td><td>${c[3]}</td><td class="puntuacion"><select id="s${c[1]}"><option value="">Seleccione…</option>${opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("")}</select></td><td class="observaciones"><textarea class="obs" id="o${c[1]}"></textarea></td>`;document.getElementById("rows").appendChild(tr);});
 const points={E:5,S:4,P:3,BP:2,NS:1,NR:0,"N/A":0};
+
 function calc(){let t=0,n=0;C.forEach(c=>{let v=document.getElementById("s"+c[1]).value;if(v!==""&&v!=="N/A"){n++;t+=points[v]||0;}});document.getElementById("total").textContent=t;document.getElementById("count").textContent=n+" de 15";document.getElementById("max").textContent=n*5;document.getElementById("percent").textContent=n?(t/(n*5)*100).toFixed(3)+"%":"0.000%";}
+
 C.forEach(c=>document.getElementById("s"+c[1]).addEventListener("change",calc));
 function data(){let d={fields:{},criteria:[]};document.querySelectorAll("input[id],select[id],textarea[id]").forEach(e=>{if(!/^s\d+$|^o\d+$/.test(e.id)&&e.id!=="load")d.fields[e.id]=e.value;});C.forEach(c=>d.criteria.push({n:c[1],score:document.getElementById("s"+c[1]).value,obs:document.getElementById("o"+c[1]).value}));return d;}
-function save(){let a=document.createElement("a"),b=new Blob([JSON.stringify(data(),null,2)],{type:"application/json"});a.href=URL.createObjectURL(b);a.download="Evaluacion_Pares_UPRA.json";a.click();URL.revokeObjectURL(a.href);}
+
+function save(){let a=document.createElement("a"),b=new Blob([JSON.stringify(data(),null,2)],{type:"application/json"});
+  a.href=URL.createObjectURL(b);
+        let profesor = document.getElementById("profesor").value.trim() || "Profesor";
+          profesor = profesor.replace(/[\\/:*?"<>|]/g, "_");
+        let año = document.getElementById("año").value.trim();
+          año = año.replace(/[\\/:*?"<>|]/g, "_");
+        let semestre = document.getElementById("semestre").value.trim();
+          semestre = semestre.replace(/[\\/:*?"<>|]/g, "_");
+        let evaluador = document.getElementById("evaluador").value.trim();
+          evaluador = evaluador.replace(/[\\/:*?"<>|]/g, "_");
+
+         a.download=`Data Evaluacion ${profesor} ${año} ${semestre} por ${evaluador} .json`;
+
+       a.click();
+       URL.revokeObjectURL(a.href);}
+
 function loadData(e){let f=e.target.files[0];if(!f)return;f.text().then(txt=>{try{let d=JSON.parse(txt);Object.entries(d.fields||{}).forEach(([k,v])=>{let el=document.getElementById(k);if(el)el.value=v;});(d.criteria||[]).forEach(c=>{document.getElementById("s"+c.n).value=c.score||"";document.getElementById("o"+c.n).value=c.obs||"";});calc();}catch{alert("No se pudo leer ese archivo.");}});e.target.value="";}
+
 function clearForm(){if(!confirm("¿Borrar todos los datos?"))return;document.querySelectorAll("input[id],select[id],textarea[id]").forEach(e=>{if(e.id!=="load")e.value="";});calc();}
 calc();
-</script></body></html>
-  </div>
+
+</script>
+
+</body>
+</html>
+ 
+</div>
 
 
 </body>
