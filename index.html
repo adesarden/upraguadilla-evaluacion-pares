@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Captura de evaluación</title>
+
+  <!-- Requiere conexión a Internet -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+    }
+
+    .contenido {
+      padding: 30px;
+      border: none;
+      background: white;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="pagina" class="contenido">
+
+<style>
+body{font:16px Arial,sans-serif;color:#172b3a;margin:0;background:#f2f5f8}
+main{max-width:1400px;margin:20px auto;padding:16px;background:white}
+h1,h2{text-align:center;color:#173e60}
+h1{font-size:23px}h2{font-size:19px;;color:#0000FF}
+
+.fields{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}label{display:block;font-size:13px;font-weight:bold;margin:8px 0 4px}input,select,textarea{font:inherit;width:100%;padding:8px;border:1px solid #9baab7;border-radius:4px;box-sizing:border-box}table{border-collapse:collapse;width:100%;margin:12px 0}th,td{border:1px solid #c7d1db;padding:8px;vertical-align:top;text-align:left;font-size:13px}th{background:#e7eef5}
+
+.group td{background:#dce8f1;font-weight:bold;color:#173e60;text-transform:uppercase}
+  .obs{min-width:140px;min-height:55px}
+  .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .metrics-resumen {display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+  .metric{background:#eef4f8;padding:14px;border-radius:6px}
+  .metric b{display:block;font-size:23px;color:#173e60;margin-top:6px}button{padding:10px 15px;margin:8px 8px 8px 0;border:0;border-radius:5px;background:#173e60;color:white;font-weight:bold;cursor:pointer}
+
+  .note{color:#4c5d6c;font-size:13px}
+  .signs{display:grid;grid-template-columns:1fr 1fr;gap:35px;margin-top:35px}
+  .line{border-top:1px solid #444;padding-top:7px;margin-top:30px}th:nth-child(4),
+ td
+
+.puntuacion {width: 180px;} td
+.puntuacion select {width: 100%;box-sizing: border-box;}th:nth-child(5),td
+.observaciones {width: 300px;}
+
+@media(max-width:750px){.fields{grid-template-columns:repeat(2,1fr)}.metrics{grid-template-columns:repeat(2,1fr)}.scroll{overflow-x:auto}table{min-width:950px}}
+@media print{body{background:white}main{margin:0;max-width:none;padding:0}button,.noprint{display:none!important}.fields{grid-template-columns:repeat(3,1fr)}input,select,textarea{border:0;border-bottom:1px solid #aaa;padding:2px;font-size:9pt;appearance:none}.obs{min-width:0;min-height:24px}th,td{padding:4px;font-size:8pt}
+
+.metrics{grid-template-columns:repeat(3,1fr)}
+.page2{break-before:page}}
+
+</style>
+
+<body><main>
+<h1>UNIVERSIDAD DE PUERTO RICO EN AGUADILLA</h1><h2>EVALUACIÓN DEL PROFESOR(A) POR PARTE DEL COMITÉ DE PERSONAL</h2>
+<p class="note">Formulario digital independiente. Complete los datos y seleccione una puntuación por criterio. El total y el porcentaje se calculan automáticamente.</p>
+<h3>Datos generales</h3><div class="fields">
+
+<div><label>Nombre del profesor(a) evaluado</label><input id="profesor"></div>
+<div><label>Departamento</label><input id="departamento"></div>
+<div><label>Tema de la clase</label><input id="tema"></div>
+<div><label>Codificación del curso</label><input id="curso"></div>
+<div><label>Año académico</label><input id="año" placeholder="ej. 2020-2021"></div>
+<div><label>Fecha de evaluación</label><input id="fecha" type="date"></div>
+<div><label>Sección</label><input id="seccion"></div>
+<div><label>Semestre</label><select id="semestre"><option></option><option>S1</option><option>S2</option></select></div><div>
+<label>Nombre del profesor(a) evaluador</label><input id="evaluador"></div></div>
+
+<p><b>Escala:</b> E = Excelente (5); S = Satisfactorio (4); P = Promedio (3); BP = Bajo promedio (2); NS = No satisfactorio (1); NR = No realizado (0); N/A = No aplica.</p>
+<div class="scroll"><table><thead><tr><th>Núm.</th><th>Criterio</th><th>Consideraciones a observar</th><th>Puntuación</th><th>Observaciones</th></tr></thead><tbody id="rows"></tbody></table></div>
+
+<h3>Resumen de puntuación</h3>
+<div class="metrics-resumen">
+  <div class="metric">Total de puntos<b id="total">0</b></div>
+  <div class="metric">Criterios evaluados<b id="count">0 de 15</b></div>
+  <div class="metric">Máximo aplicable<b id="max">0</b></div>
+  <div class="metric">Calificación porcentual<b id="percent"style="color: blue;">0.000%</b></div>
+</div>
+
+<p class="note">Fórmula: suma de puntos ÷ (5 × número de criterios evaluados) × 100. N/A se excluye del cálculo. NR cuenta como criterio evaluado con cero puntos. Si no se observan preguntas de estudiantes, marque N/A en el criterio 3.</p>
+<div class="page2"><h3>Comentarios y recomendaciones</h3>
+
+<label>Comentarios generales</label><textarea id="comentarios" rows="3"></textarea><label>Recomendaciones específicas</label><textarea id="recomendaciones" rows="3"></textarea>
+<div class="signs"><div><div class="line">Firma del Evaluador(a)</div><label>Fecha</label><input type="date" id="fechaFirmaEval"></div><div><div class="line">Firma del Evaluado(a)</div><label>Fecha</label><input type="date" id="fechaFirmaProf"></div></div>
+<h3>Disposiciones requeridas</h3><ol><li>La evaluación será discutida con el profesor(a) dentro de cinco días laborables a partir de la fecha de evaluación. Luego de discutida, se le entregará copia al profesor(a).</li><li>La primera página debe contener las iniciales del evaluador(a) y del evaluado(a). La segunda página lleva las firmas. Ambas firmas indican que la evaluación se discutió y los cómputos se constataron.</li><li>La firma del evaluado(a) no necesariamente indica que está de acuerdo con los resultados.</li></ol><p><b>Nota:</b> Toda corrección debe contener las iniciales del evaluador(a) y del evaluado(a).</p><p class="note">SENADO ACADÉMICO — CERTIFICACIÓN 2020-21-30 SA · Rúbrica Rev. 2022 edc.</p></div>
+
+<!-- Área de Botones al final de la hoja -->
+
+   <div class="noprint">  <!-- Hide Buttons when print as PDF -->
+
+       <button onclick="clearForm()">Start New Evaluation</button>
+
+       <button onclick="document.getElementById('load').click()">Load Evaluation Data (.json)</button>
+          <input id="load" type="file" accept=".json" hidden onchange="loadData(event)">
+
+       <button onclick="save()">Download Evaluation Data (.json)</button>
+
+       <button onclick="guardarPDF()">Save Evaluation as PDF</button>
+
+   </div>
+
+<script>
+   async function guardarPDF() {
+    const elemento = document.getElementById("pagina");
+
+    // Hide buttons and controls that should not appear in the PDF
+    const ocultos = elemento.querySelectorAll(".noprint");
+    ocultos.forEach(e => e.style.display = "none");
+
+    try {
+        const canvas = await html2canvas(elemento, {
+            scale: 1,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            windowWidth: elemento.scrollWidth,
+            windowHeight: elemento.scrollHeight
+        });
+
+        // Set a fixed width and calculate the required height
+        const anchoPDF = 216; // mm
+        const altoPDF = anchoPDF * canvas.height / canvas.width;
+
+        const { jsPDF } = window.jspdf;
+
+        const pdf = new jsPDF({
+            orientation: "portrait",
+            unit: "mm",
+            format: [anchoPDF, altoPDF],
+            compress: true
+        });
+
+        const imagen = canvas.toDataURL("image/jpeg", 0.95);
+
+        // Place the complete evaluation on a single page
+        pdf.addImage(
+            imagen,
+            "JPEG",
+            0,
+            0,
+            anchoPDF,
+            altoPDF
+        );
+
+        let profesor =
+            document.getElementById("profesor").value.trim() || "Profesor";
+
+        let año =
+            document.getElementById("año").value.trim();
+
+        let semestre =
+            document.getElementById("semestre").value.trim();
+
+
+        profesor = profesor.replace(/[\\/:*?"<>|]/g, "_");
+        año = año.replace(/[\\/:*?"<>|]/g, "_");
+        semestre = semestre.replace(/[\\/:*?"<>|]/g, "_");
+
+
+        pdf.save(`Evaluación ${profesor} ${año} ${semestre}.pdf`);
+
+    } catch (error) {
+        alert("No fue posible generar el PDF.");
+        console.error(error);
+
+    } finally {
+        // Restore the controls in the HTML form
+        ocultos.forEach(e => e.style.display = "");
+    }
+  }
+
+</script>
+
+<div class="noprint">
+<p class="note noprint"> 
+  <ul>
+   <li>Esta herramienta funciona localmente; <span style="color: red;">por lo que debe enviar copia de la versión PDF al director del comité de personal.</span></li>
+   <li>Debe conservar los datos de la evaluación en formato (.json).</li> 
+   <li>Si desea realizar cambios a una evaluación realizada, cargue los datos de la misma en formato (.json) y edite.</li>
+  <ul>
+</p>
+<div
+
+</main>
+<script>
+const C=[
+["Dominio de la materia",1,"Demuestra estar al día con la información pertinente al tema expuesto.","No se observan errores en el contenido ofrecido. Vincula el tema a tendencias actuales y pertinentes."],
+["Dominio de la materia",2,"Demuestra estar preparado para la clase.","Lleva una secuencia lógica y profundiza en la discusión. Presenta ejemplos recientes y cita el texto o recursos didácticos."],
+["Dominio de la materia",3,"Responde las preguntas de los estudiantes.","Atiende las preguntas y presenta respuestas completas. No se contabiliza si no se observan preguntas de estudiantes."],
+["Metodología",4,"Hace referencia al propósito u objetivo de la clase.","Presenta el objetivo y/o propósito de la clase."],
+["Metodología",5,"Establece relaciones con conceptos aprendidos anteriormente.","Vincula el tema con conceptos de otros cursos, clases o laboratorios y alude a otros materiales didácticos."],
+["Metodología",6,"Utiliza multimedios para discutir, impartir, presentar, aclarar, resumir o recalcar conceptos expresados verbal o digitalmente.","Utiliza medios apropiados —pizarra, páginas virtuales, videos, presentaciones, entre otros— para aclarar o resaltar conceptos."],
+["Metodología",7,"Resume lo explicado y discutido en clase.","Presenta un resumen general al final de la sesión y/o resumen parcial por conceptos."],
+["Metodología",8,"Explica con claridad, precisión y efectividad el trabajo a realizarse.","Explica cómo, dónde encontrar y qué hacer para realizar satisfactoriamente el trabajo asignado."],
+["Metodología",9,"Explora el nivel de entendimiento mediante preguntas de discusión, sin abandonar el tema central.","Formula preguntas directas relacionadas con el tema presentado."],
+["Metodología",10,"Estimula el pensamiento, la reflexión y/o el análisis crítico.","Estimula a contrastar pros y contras, ventajas y desventajas. No se penaliza si los estudiantes no responden o reaccionan."],
+["Metodología",11,"Presenta el material de la clase en forma clara y organizada.","Presenta el material en secuencia lógica y coherente."],
+["Interacción con los estudiantes",12,"Promueve la participación activa de los estudiantes.","Invita a aportar ideas, experiencias u opiniones y propicia receptividad y entusiasmo. No se penaliza si el estudiante no participa."],
+["Interacción con los estudiantes",13,"Mantiene un ambiente de respeto mutuo, tolerancia y solidaridad.","Utiliza lenguaje apropiado y tolera diversidad de opiniones sin prejuicios ni discriminación."],
+["Interacción con los estudiantes",14,"Presenta ejemplos, situaciones o casos de estudios vinculados al tema de la clase.","Menciona situaciones pertinentes e importantes relacionadas con el tema."],
+["Comunicación",15,"Se expresa con seguridad, propiedad, claridad y corrección.","Utiliza lenguaje claro y correcto para una comunicación efectiva y un buen ambiente de enseñanza-aprendizaje."]
+];
+const opts=[["E","5 - Excelente"],["S","4 - Satisfactorio"],["P","3 - Promedio"],["BP","2 - Bajo promedio"],["NS","1 - No satisfactorio"],["NR","0 - No realizado"],["N/A","X - No aplica"]];
+let group="";
+C.forEach(c=>{if(c[0]!==group){let tr=document.createElement("tr");tr.className="group";tr.innerHTML="<td colspan='5'></td>";tr.firstChild.textContent=c[0];document.getElementById("rows").appendChild(tr);group=c[0];}
+let tr=document.createElement("tr");tr.innerHTML=`<td>${c[1]}</td><td>${c[2]}</td><td>${c[3]}</td><td class="puntuacion"><select id="s${c[1]}"><option value="">Seleccione…</option>${opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("")}</select></td><td class="observaciones"><textarea class="obs" id="o${c[1]}"></textarea></td>`;document.getElementById("rows").appendChild(tr);});
+const points={E:5,S:4,P:3,BP:2,NS:1,NR:0,"N/A":0};
+function calc(){let t=0,n=0;C.forEach(c=>{let v=document.getElementById("s"+c[1]).value;if(v!==""&&v!=="N/A"){n++;t+=points[v]||0;}});document.getElementById("total").textContent=t;document.getElementById("count").textContent=n+" de 15";document.getElementById("max").textContent=n*5;document.getElementById("percent").textContent=n?(t/(n*5)*100).toFixed(3)+"%":"0.000%";}
+C.forEach(c=>document.getElementById("s"+c[1]).addEventListener("change",calc));
+function data(){let d={fields:{},criteria:[]};document.querySelectorAll("input[id],select[id],textarea[id]").forEach(e=>{if(!/^s\d+$|^o\d+$/.test(e.id)&&e.id!=="load")d.fields[e.id]=e.value;});C.forEach(c=>d.criteria.push({n:c[1],score:document.getElementById("s"+c[1]).value,obs:document.getElementById("o"+c[1]).value}));return d;}
+function save(){let a=document.createElement("a"),b=new Blob([JSON.stringify(data(),null,2)],{type:"application/json"});a.href=URL.createObjectURL(b);a.download="Evaluacion_Pares_UPRA.json";a.click();URL.revokeObjectURL(a.href);}
+function loadData(e){let f=e.target.files[0];if(!f)return;f.text().then(txt=>{try{let d=JSON.parse(txt);Object.entries(d.fields||{}).forEach(([k,v])=>{let el=document.getElementById(k);if(el)el.value=v;});(d.criteria||[]).forEach(c=>{document.getElementById("s"+c.n).value=c.score||"";document.getElementById("o"+c.n).value=c.obs||"";});calc();}catch{alert("No se pudo leer ese archivo.");}});e.target.value="";}
+function clearForm(){if(!confirm("¿Borrar todos los datos?"))return;document.querySelectorAll("input[id],select[id],textarea[id]").forEach(e=>{if(e.id!=="load")e.value="";});calc();}
+calc();
+</script></body></html>
+  </div>
+
+
+</body>
+</html>
