@@ -92,11 +92,11 @@
       text-transform: uppercase;
     }
 
-    .numero-criterio { text-align: center; vertical-align: middle; }
+    .numero-criterio { text-align: center; vertical-align: top; }
     .puntuacion { width: 190px; min-width: 190; max-width: 190; }
     .puntuacion select { width: 100%; box-sizing: border-box; }
     .observaciones { width: 350px; }
-    .obs { min-width: 140px; min-height: 55px; height: auto; white-space: pre-wrap; overflow: visible; overflow-wrap: break-word; box-sizing: border-box; }
+    .obs { min-width: 140px; min-height: 55px; height: auto; white-space: pre-wrap; overflow: visible; overflow-wrap: break-word; box-sizing: border-box; } 
 
     .metrics-resumen {
       display: grid;
@@ -335,7 +335,7 @@
       <button type="button" id="loadButton">Load Evaluation Data (.json)</button>
       <input id="load" type="file" accept=".json" hidden>
       <button type="button" id="saveButton">Download Evaluation Data (.json)</button>
-      <button type="button" id="pdfButton" class="share">Save & Email Evaluation as PDF</button>
+      <button type="button" id="pdfButton" class="share">Save or Email Evaluation as PDF</button>
  <!-- <button type="button" id="emailButton" class="secondary">Send (Manually Attached PDF) by Email</button>  
       <button type="button" id="shareButton" class="share">Share PDF</button> --> 
 
@@ -558,7 +558,7 @@
       const enlace = document.createElement("a");
 
       enlace.href = url;
-      enlace.download = crearNombreArchivo("Datos Resultados de Evaluacion ( ", " ).json");
+      enlace.download = crearNombreArchivo("Datos Resultados Evaluacion ( ", " ).json");
       document.body.appendChild(enlace);
       enlace.click();
       enlace.remove();
@@ -723,6 +723,15 @@
 
     async function guardarPDF() {
       try {
+
+        //  OK   = crear el PDF y abre el correo pre-definido para adjuntarlo.
+        //Cancel = crear solamente el PDF y lo guarda en ( Downloads\ )
+        const crearYEnviar = confirm(
+          "¿Qué desea hacer?\n\n" +
+          "   OK    = crear el PDF y abre el correo pre-definido para adjuntarlo\n" +
+          "Cancel = crear solamente el PDF y lo guarda en ( Downloads\ )"
+        );
+
         const resultado = await generarPDFBlob();
         ultimoPDF = { blob: resultado.blob, nombre: resultado.nombre };
 
@@ -735,9 +744,18 @@
         enlace.click();
         enlace.remove();
         URL.revokeObjectURL(url);
-        alert("• PDF descargado en Downloads.\n\n• Se enviará copia preliminar del PFD a \n  ( julia.rodriguez6@upr.edu ) por email.\n\n• Debe adjuntar la copia del PDF manualmente.");
+
+        // Ejecutar el envío solamente si el usuario lo autorizó.
+        if (crearYEnviar) {
+          await enviarPorEmail();
+          alert("• PDF descargado en Downloads.\n\n• Se enviará copia preliminar del PFD a \n  ( julia.rodriguez6@upr.edu ) por email.\n\n• Debe adjuntar la copia del PDF manualmente.");
+        } else {
+          alert("El PDF se generó y se descargó correctamente en ( Downloads\ ).");
+        }
+
+
      // Abrir automáticamente el correo
-        await enviarPorEmail();
+     // await enviarPorEmail();
 
       } catch (error) {
         alert(error.message || "No fue posible generar el PDF.");
