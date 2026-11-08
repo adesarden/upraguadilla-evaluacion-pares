@@ -96,7 +96,19 @@
     .puntuacion { width: 190px; min-width: 190; max-width: 190; }
     .puntuacion select { width: 100%; box-sizing: border-box; }
     .observaciones { width: 350px; }
-    .obs { min-width: 140px; min-height: 55px; height: auto; white-space: pre-wrap; overflow: visible; overflow-wrap: break-word; box-sizing: border-box; } 
+    .obs { min-width: 140px; min-height: 55px; height: auto; white-space: pre-wrap; overflow: visible; overflow-wrap: break-word; box-sizing: border-box; }
+
+    /* Campos de comentarios y recomendaciones: conservan saltos de línea
+       y se expanden según la cantidad de texto. */
+    .comentario-multilinea {
+      width: 100%;
+      min-height: 55px;
+      height: auto;
+      white-space: pre-wrap;
+      overflow: visible;
+      overflow-wrap: break-word;
+      box-sizing: border-box;
+    } 
 
     .metrics-resumen {
       display: grid;
@@ -275,7 +287,7 @@
       <div class="metric">Total de puntos<b id="total">0</b></div>
       <div class="metric">Criterios evaluados<b id="count">0 de 15</b></div>
       <div class="metric">Máximo aplicable<b id="max">0</b></div>
-      <div class="metric">Calificación porcentual<b id="percent" style="color: blue;">0.000%</b></div>
+      <div class="metric">Calificación porcentual<b id="percent" style="color: blue;">0.00%</b></div>
     </div>
 
     <p class="note">
@@ -289,10 +301,10 @@
       <h3>Comentarios y recomendaciones</h3>
 
       <label for="comentarios">Comentarios generales</label>
-      <textarea id="comentarios" rows="3"></textarea>
+      <textarea id="comentarios" class="comentario-multilinea" rows="3"></textarea>
 
       <label for="recomendaciones">Recomendaciones específicas</label>
-      <textarea id="recomendaciones" rows="3"></textarea>
+      <textarea id="recomendaciones" class="comentario-multilinea" rows="3"></textarea>
 
       <div class="signs">
         <div>
@@ -484,6 +496,12 @@
           .addEventListener("change", calcularPuntuacion);
       });
 
+      // Expandir automáticamente los campos de comentarios al escribir.
+      document.querySelectorAll("textarea.comentario-multilinea").forEach((campo) => {
+        campo.addEventListener("input", () => ajustarAlturaTextarea(campo));
+        ajustarAlturaTextarea(campo);
+      });
+
       document.getElementById("clearButton").addEventListener("click", clearForm);
       document.getElementById("loadButton").addEventListener("click", () => {
         document.getElementById("load").click();
@@ -495,6 +513,12 @@
       if (emailButton) emailButton.addEventListener("click", enviarPorEmail);
       const shareButton = document.getElementById("shareButton");
       if (shareButton) shareButton.addEventListener("click", compartirPDF);
+    }
+
+    // Ajusta la altura de un textarea para mostrar todo su contenido.
+    function ajustarAlturaTextarea(campo) {
+      campo.style.height = "auto";
+      campo.style.height = `${campo.scrollHeight}px`;
     }
 
     /* =========================================================
@@ -518,7 +542,7 @@
       document.getElementById("count").textContent = `${evaluados} de ${CRITERIOS.length}`;
       document.getElementById("max").textContent = evaluados * 5;
       document.getElementById("percent").textContent =
-        evaluados ? `${(total / (evaluados * 5) * 100).toFixed(3)}%` : "0.000%";
+        evaluados ? `${(total / (evaluados * 5) * 100).toFixed(2)}%` : "0.00%";
     }
 
     /* =========================================================
@@ -589,6 +613,7 @@
           if (observaciones) observaciones.value = criterio.obs || "";
         });
 
+        document.querySelectorAll("textarea.comentario-multilinea").forEach(ajustarAlturaTextarea);
         calcularPuntuacion();
       } catch (error) {
         alert("No se pudo leer ese archivo JSON.");
@@ -635,7 +660,7 @@
       const reemplazos = [];
 
       try {
-        elemento.querySelectorAll("textarea.obs").forEach((campo) => {
+        elemento.querySelectorAll("textarea.obs, textarea.comentario-multilinea").forEach((campo) => {
           const estilo = window.getComputedStyle(campo);
           const rect = campo.getBoundingClientRect();
           const div = document.createElement("div");
